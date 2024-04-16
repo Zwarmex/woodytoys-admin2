@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   db:
-    build: ./database
+    image: xdubruille/woody_database:latest
     cap_add:
       - SYS_NICE
     restart: always
@@ -11,20 +11,40 @@ services:
       - MYSQL_ROOT_PASSWORD=pass
     ports:
       - '3306:3306'
+    networks:
+      - woody_net
+    deploy:
+      restart_policy:
+        condition: any
 
   api:
-    build: ./api
+    image: xdubruille/woody_api:latest
     restart: always
-    links:
-      - "db"
-
+    networks:
+      - woody_net
+    deploy:
+      restart_policy:
+        condition: any
   front:
-    build: ./front
+    image: xdubruille/woody_front:latest
+    networks:
+      - woody_net
+    deploy:
+      restart_policy:
+        condition: any
 
   reverse:
-    build: ./reverse-proxy
+    image: xdubruille/woody_rp:latest
     ports:
       - "80:8080"
     depends_on:
       - front
       - api
+    networks:
+      - woody_net
+    deploy:
+      restart_policy:
+        condition: any
+networks:
+  woody_net:
+    driver: overlay
