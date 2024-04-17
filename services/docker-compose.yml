@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   db:
-    image: xdubruille/woody_database:latest
+    image: zwarmex/woody_database:latest
     cap_add:
       - SYS_NICE
     restart: always
@@ -19,7 +19,7 @@ services:
         condition: any
 
   api:
-    image: xdubruille/woody_api:latest
+    image: zwarmex/woody_api:latest
     restart: always
     networks:
       - woody_net
@@ -28,7 +28,7 @@ services:
       restart_policy:
         condition: any
   front:
-    image: xdubruille/woody_front:latest
+    image: zwarmex/woody_front:latest
     networks:
       - woody_net
     deploy:
@@ -37,7 +37,7 @@ services:
         condition: any
 
   reverse:
-    image: xdubruille/woody_rp:latest
+    image: zwarmex/woody_rp:latest
     ports:
       - "80:8080"
     depends_on:
