@@ -1,4 +1,4 @@
-
+Voici le wiki : https://github.com/Zwarmex/admin-II/wiki
 
 Monorepo dédié à l'infra de Woodytoys.
 
