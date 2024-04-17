@@ -33,7 +33,14 @@ def slow_dynamic():
 
 @app.get('/api/fast')
 def fast():
-    return f'fast: {datetime.now()}'
+    # Mettre en cache les résultats pour cet endpoint
+    cached_result = r.get('fast_result')
+    if cached_result:
+        return cached_result
+
+    result = f'fast: {datetime.now()}'
+    r.setex('fast_result', 60, result)  # Cache la valeur avec une expiration de 60 secondes
+    return result
 
 @app.post('/api/database')
 def products():
