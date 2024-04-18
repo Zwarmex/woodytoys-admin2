@@ -13,6 +13,10 @@ services:
       - '3306:3306'
     networks:
       - woody_net
+      - traefik_net
+    labels:
+      - "traefik.port=80"
+      - "traefik.docker.network=traefik-net"
     deploy:
       replicas: 3
       restart_policy:
@@ -23,14 +27,7 @@ services:
     restart: always
     networks:
       - woody_net
-    labels: 
-      - "traefik.backend=api"
-      - "traefik.backend.loadbalancer.sticky=true"
-      - "traefik.backend.loadbalancer.swarm=true"
-      - "traefik.api.frontend.backend=BACKEND"
-    depends_on: 
-      - db
-      - redis
+      - traefik_net
     deploy:
       replicas: 3
       restart_policy:
@@ -44,25 +41,33 @@ services:
     labels:
       - "traefik.http.routers.front.rule=Host(`www.l1-3.ephec-ti.be`)"
       - "traefik.http.services.front.loadbalancer.server.port=80"
-      - "traefik.http.routers.front.entrypoints=http"
-      - "traefik.port=80"
-    depends_on:
-      - api
-      - traefik
     deploy:
       replicas: 3
       restart_policy:
         condition: any
 
+          #  reverse:
+          #image: zwarmex/woody_rp:latest
+          #ports:
+          # - "80:8080"
+          #depends_on:
+          # - front
+          #- api
+          #networks:
+          #- woody_net
+          #deploy:
+          # replicas: 3
+          #restart_policy:
+          # condition: any
+
   traefik:
-    image: traefik:v3.0
-    command:
-      - '--log.level=DEBUG'
-      - '--api.insecure=true'
-      - '--providers.docker=true'
-      - '--providers.docker.exposedbydefault=true'
-      - '--providers.docker.network=traefik_net'
-      - '--entrypoints.http.address=:80'
+    image: traefik:1.7  # Assurez-vous de remplacer <stable version> par la version spécifique de Traefik que vous utilisez
+    command: >
+      --docker \
+      --docker.swarmMode \
+      --docker.domain=traefik \
+      --docker.watch \
+      --api
     ports:
       - "80:80"
       - "8080:8080"
@@ -71,6 +76,9 @@ services:
     networks:
       - traefik_net
       - woody_net
+    labels:
+      - "traefik.port=80"
+      - "traefik.docker.network=traefik-net"
     deploy:
       placement:
         constraints:
@@ -80,6 +88,7 @@ services:
     image: redis:latest
     networks:
       - woody_net
+      - traefik_net
     deploy:
       replicas: 3
       restart_policy:
