@@ -18,19 +18,62 @@ services:
       restart_policy:
         condition: any
 
-  api:
-    image: zwarmex/woody_api:latest
-    restart: always
+  # api:
+    # image: zwarmex/woody_api:latest
+    # restart: always
+    # networks:
+      # - woody_net
+    # labels: 
+      # - "traefik.backend=api"
+      # - "traefik.backend.loadbalancer.sticky=true"
+      # - "traefik.backend.loadbalancer.swarm=true"
+      # - "traefik.api.frontend.backend=BACKEND"
+    # depends_on: 
+      # - db
+      # - redis
+    # deploy:
+      # replicas: 3
+      # restart_policy:
+        # condition: any
+
+  product_service:
+    image: zwarmex/woody_api_product:latest
     networks:
       - woody_net
-    labels: 
-      - "traefik.backend=api"
-      - "traefik.backend.loadbalancer.sticky=true"
-      - "traefik.backend.loadbalancer.swarm=true"
-      - "traefik.api.frontend.backend=BACKEND"
-    depends_on: 
+    depends_on:
       - db
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: any
+
+  time_service:
+    image: zwarmex/woody_api_time:latest
+    networks:
+      - woody_net
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: any
+
+  heavy_service:
+    image: zwarmex/woody_api_heavy:latest
+    networks:
+      - woody_net
+    depends_on:
       - redis
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: any
+
+  order_service:
+    image: zwarmex/woody_api_order:latest
+    networks:
+      - woody_net
+    depends_on:
+      - product_service
+      - heavy_service
     deploy:
       replicas: 3
       restart_policy:
@@ -40,41 +83,56 @@ services:
     image: zwarmex/woody_front:latest
     networks:
       - woody_net
-      - traefik_net
-    labels:
-      - "traefik.http.routers.front.rule=Host(`www.l1-3.ephec-ti.be`)"
-      - "traefik.http.services.front.loadbalancer.server.port=80"
-      - "traefik.http.routers.front.entrypoints=http"
-      - "traefik.port=80"
+      # - traefik_net
+    # labels:
+      # - "traefik.http.routers.front.rule=Host(`www.l1-3.ephec-ti.be`)"
+      # - "traefik.http.services.front.loadbalancer.server.port=80"
+      # - "traefik.http.routers.front.entrypoints=http"
+      # - "traefik.port=80"
+    # ports:
+      # - "80:80"
     depends_on:
-      - api
-      - traefik
+      - reverse 
+      # - traefik
     deploy:
       replicas: 3
       restart_policy:
         condition: any
 
-  traefik:
-    image: traefik:v3.0
-    command:
-      - '--log.level=DEBUG'
-      - '--api.insecure=true'
-      - '--providers.docker=true'
-      - '--providers.docker.exposedbydefault=true'
-      - '--providers.docker.network=traefik_net'
-      - '--entrypoints.http.address=:80'
+  # traefik:
+    # image: traefik:v3.0
+    # command:
+      # - '--log.level=DEBUG'
+      # - '--api.insecure=true'
+      # - '--providers.docker=true'
+      # - '--providers.docker.exposedbydefault=true'
+      # - '--providers.docker.network=traefik_net'
+      # - '--entrypoints.http.address=:80'
+    # ports:
+      # - "80:80"
+      # - "8080:8080"
+    # volumes:
+      # - "/var/run/docker.sock:/var/run/docker.sock"
+    # networks:
+      # - traefik_net
+      # - woody_net
+    # deploy:
+      # placement:
+        # constraints:
+          # - node.role == manager
+  reverse:
+    image: zwarmex/woody_rp:latest
     ports:
-      - "80:80"
-      - "8080:8080"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "80:8080"
     networks:
-      - traefik_net
-      - woody_net
+      - woody_net 
+    depends_on:
+      - api
+      - front
     deploy:
-      placement:
-        constraints:
-          - node.role == manager
+      replicas: 3
+      restart_policy:
+        condition: any
 
   redis:
     image: redis:latest
@@ -88,5 +146,5 @@ services:
 networks:
   woody_net:
     driver: overlay
-  traefik_net:
-    driver: overlay
+  # traefik_net:
+    # driver: overlay

@@ -1,0 +1,101 @@
+version: "3.9"
+
+services:
+  db:
+    image: zwarmex/woody_database:latest
+    cap_add:
+      - SYS_NICE
+    restart: always
+    environment:
+      - MYSQL_DATABASE=woody
+      - MYSQL_ROOT_PASSWORD=pass
+    ports:
+      - '3306:3306'
+    networks:
+      - woody_net
+      - traefik_net
+    labels:
+      - "traefik.port=80"
+      - "traefik.docker.network=traefik-net"
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: any
+
+  api:
+    image: zwarmex/woody_api:latest
+    restart: always
+    networks:
+      - woody_net
+      - traefik_net
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: any
+
+  front:
+    image: zwarmex/woody_front:latest
+    networks:
+      - woody_net
+      - traefik_net
+    labels:
+      - "traefik.http.routers.front.rule=Host(`www.l1-3.ephec-ti.be`)"
+      - "traefik.http.services.front.loadbalancer.server.port=80"
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: any
+
+          #  reverse:
+          #image: zwarmex/woody_rp:latest
+          #ports:
+          # - "80:8080"
+          #depends_on:
+          # - front
+          #- api
+          #networks:
+          #- woody_net
+          #deploy:
+          # replicas: 3
+          #restart_policy:
+          # condition: any
+
+  traefik:
+    image: traefik:1.7  # Assurez-vous de remplacer <stable version> par la version spécifique de Traefik que vous utilisez
+    command: >
+      --docker \
+      --docker.swarmMode \
+      --docker.domain=traefik \
+      --docker.watch \
+      --api
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - traefik_net
+      - woody_net
+    labels:
+      - "traefik.port=80"
+      - "traefik.docker.network=traefik-net"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  redis:
+    image: redis:latest
+    networks:
+      - woody_net
+      - traefik_net
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: any
+
+networks:
+  woody_net:
+    driver: overlay
+  traefik_net:
+    driver: overlay

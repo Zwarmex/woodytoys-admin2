@@ -1,0 +1,92 @@
+version: "3.9"
+
+services:
+  db:
+    image: zwarmex/woody_database:latest
+    cap_add:
+      - SYS_NICE
+    restart: always
+    environment:
+      - MYSQL_DATABASE=woody
+      - MYSQL_ROOT_PASSWORD=pass
+    ports:
+      - '3306:3306'
+    networks:
+      - woody_net
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: any
+
+  api:
+    image: zwarmex/woody_api:latest
+    restart: always
+    networks:
+      - woody_net
+    # labels: 
+      # - "traefik.backend=api"
+      # - "traefik.backend.loadbalancer.sticky=true"
+      # - "traefik.backend.loadbalancer.swarm=true"
+      # - "traefik.api.frontend.backend=BACKEND"
+    depends_on: 
+      - db
+      - redis
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: any
+
+  front:
+    image: zwarmex/woody_front:latest
+    networks:
+      - woody_net
+      # - traefik_net
+    # labels:
+      # - "traefik.http.routers.front.rule=Host(`www.l1-3.ephec-ti.be`)"
+      # - "traefik.http.services.front.loadbalancer.server.port=80"
+      # - "traefik.http.routers.front.entrypoints=http"
+      # - "traefik.port=80"
+    depends_on:
+      - api
+      # - traefik
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: any
+
+  # traefik:
+    # image: traefik:v3.0
+    # command:
+      # - '--log.level=DEBUG'
+      # - '--api.insecure=true'
+      # - '--providers.docker=true'
+      # - '--providers.docker.exposedbydefault=true'
+      # - '--providers.docker.network=traefik_net'
+      # - '--entrypoints.http.address=:80'
+    # ports:
+      # - "80:80"
+      # - "8080:8080"
+    # volumes:
+      # - "/var/run/docker.sock:/var/run/docker.sock"
+    # networks:
+      # - traefik_net
+      # - woody_net
+    # deploy:
+      # placement:
+        # constraints:
+          # - node.role == manager
+
+  redis:
+    image: redis:latest
+    networks:
+      - woody_net
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: any
+
+networks:
+  woody_net:
+    driver: overlay
+  # traefik_net:
+    # driver: overlay
