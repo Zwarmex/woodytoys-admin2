@@ -19,11 +19,8 @@ docker build -t zwarmex/woody_front:"$version" front
 docker tag zwarmex/woody_front:"$version" zwarmex/woody_front:latest
 
 # Microservices ----------------------------------
-docker build -t zwarmex/woody_api_time:"$version" api-time
-docker tag zwarmex/woody_api_time:"$version" zwarmex/woody_api_time:latest
-
-docker build -t zwarmex/woody_api_heavy:"$version" api-heavy
-docker tag zwarmex/woody_api_heavy:"$version" zwarmex/woody_api_heavy:latest
+docker build -t zwarmex/woody_api_misc:"$version" api-misc
+docker tag zwarmex/woody_api_misc:"$version" zwarmex/woody_api_misc:latest
 
 docker build -t zwarmex/woody_api_order:"$version" api-order
 docker tag zwarmex/woody_api_order:"$version" zwarmex/woody_api_order:latest
@@ -38,11 +35,8 @@ docker tag zwarmex/woody_api_product:"$version" zwarmex/woody_api_product:latest
 # docker push zwarmex/woody_api:latest
 
 # Microservices ----------------------------------
-docker push zwarmex/woody_api_time:"$version"
-docker push zwarmex/woody_api_time:latest
-
-docker push zwarmex/woody_api_heavy:"$version"
-docker push zwarmex/woody_api_heavy:latest
+docker push zwarmex/woody_api_misc:"$version"
+docker push zwarmex/woody_api_misc:latest
 
 docker push zwarmex/woody_api_order:"$version"
 docker push zwarmex/woody_api_order:latest

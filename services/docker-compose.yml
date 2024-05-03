@@ -47,21 +47,10 @@ services:
       restart_policy:
         condition: any
 
-  time_service:
-    image: zwarmex/woody_api_time:latest
+  misc_service:
+    image: zwarmex/woody_api_misc:latest
     networks:
       - woody_net
-    deploy:
-      replicas: 3
-      restart_policy:
-        condition: any
-
-  heavy_service:
-    image: zwarmex/woody_api_heavy:latest
-    networks:
-      - woody_net
-    depends_on:
-      - redis
     deploy:
       replicas: 3
       restart_policy:
@@ -73,7 +62,7 @@ services:
       - woody_net
     depends_on:
       - product_service
-      - heavy_service
+      - misc_service
     deploy:
       replicas: 3
       restart_policy:
