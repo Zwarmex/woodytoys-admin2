@@ -28,6 +28,12 @@ docker tag zwarmex/woody_api_order:"$version" zwarmex/woody_api_order:latest
 docker build -t zwarmex/woody_api_product:"$version" api-product
 docker tag zwarmex/woody_api_product:"$version" zwarmex/woody_api_product:latest
 # ------------------------------------------------
+# RabbitMQ
+
+docker build -t zwarmex/woody_rabbitmq:"$version" rabbitmq
+docker tag zwarmex/woody_rabbitmq:"$version" zwarmex/woody_rabbitmq:latest
+
+
 
 # avec le "set -e" du début, je suis assuré que rien ne sera pushé si un seul build ne c'est pas bien passé
 
@@ -44,6 +50,10 @@ docker push zwarmex/woody_api_order:latest
 docker push zwarmex/woody_api_product:"$version"
 docker push zwarmex/woody_api_product:latest
 # ------------------------------------------------
+# RabbitMQ
+
+docker push zwarmex/woody_rabbitmq:"$version"
+docker push zwarmex/woody_rabbitmq:latest
 
 docker push zwarmex/woody_rp:"$version"
 docker push zwarmex/woody_rp:latest

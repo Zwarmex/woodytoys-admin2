@@ -3,4 +3,3 @@ flask-cors
 mysql-connector-python
 redis
 pika
-

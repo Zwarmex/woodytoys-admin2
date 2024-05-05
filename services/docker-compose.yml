@@ -63,11 +63,23 @@ services:
     depends_on:
       - product_service
       - misc_service
+      - rabbitmq
     deploy:
       replicas: 3
       restart_policy:
         condition: any
 
+  
+  rabbitmq:
+    image: zwarmex/woody_rabbitmq:latest
+    ports:
+      - "5672:5672"
+    networks:
+      - woody_net
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: any
   front:
     image: zwarmex/woody_front:latest
     networks:
